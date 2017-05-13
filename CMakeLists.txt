@@ -5,10 +5,7 @@ project(HLSLcc)
 
 option(HLSLCC_LIBRARY_SHARED "Build shared library instead of static." ON)
 
-if(MSVC)
-	add_definitions(-DNOMINMAX -DVC_EXTRALEAN -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
-endif(MSVC)
-
+file(GLOB HLSLCC_HDRS "${CMAKE_CURRENT_SOURCE_DIR}/include/*")
 set(HLSLCC_SRC
 		src/ControlFlowGraph.cpp
 		src/ControlFlowGraphUtils.cpp
@@ -37,16 +34,31 @@ set(HLSLCC_SRC
 		src/cbstring/bstraux.c
 		src/cbstring/bstrlib.c)
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}"
-		"${CMAKE_CURRENT_SOURCE_DIR}/include"
-		"${CMAKE_CURRENT_SOURCE_DIR}/src/internal_includes"
-		"${CMAKE_CURRENT_SOURCE_DIR}/src/cbstring"
-		"${CMAKE_CURRENT_SOURCE_DIR}/src")
-
 if(HLSLCC_LIBRARY_SHARED)
 	add_library(hlslcc SHARED ${HLSLCC_SRC})
 else(HLSLCC_LIBRARY_SHARED)
 	add_library(hlslcc STATIC ${HLSLCC_SRC})
 endif(HLSLCC_LIBRARY_SHARED)
 
-set_property(TARGET hlslcc PROPERTY CXX_STANDARD 11)
+target_include_directories(hlslcc
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/cbstring>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/internal_includes>)
+set_target_properties(hlslcc PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED ON
+    PUBLIC_HEADERS ${HLSLCC_HDRS})
+install(TARGETS hlslcc
+    EXPORT hlslccConfig
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+    PUBLIC_HEADER DESTINATION include/hlslcc)
+install(FILES ${HLSLCC_HDRS} DESTINATION include/hlslcc)
+install(EXPORT hlslccConfig DESTINATION share/hlslcc/cmake)
+export(TARGETS hlslcc FILE hlslccConfig.cmake)
