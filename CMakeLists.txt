@@ -62,3 +62,28 @@ install(TARGETS hlslcc
 install(FILES ${HLSLCC_HDRS} DESTINATION include/hlslcc)
 install(EXPORT hlslccConfig DESTINATION share/hlslcc/cmake)
 export(TARGETS hlslcc FILE hlslccConfig.cmake)
+
+set(HLSLCC_EXE_SRC
+	src/main.cpp
+	${HLSLCC_SRC})
+
+add_executable(hlslcc_exe ${HLSLCC_EXE_SRC})
+target_include_directories(hlslcc_exe
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/cbstring>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/internal_includes>)
+set_target_properties(hlslcc_exe PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED ON
+    PUBLIC_HEADERS ${HLSLCC_HDRS}
+    OUTPUT_NAME hlslcc)
+if (WIN32)
+    set_target_properties(hlslcc_exe PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:Console /INCREMENTAL:NO")   
+endif()
+install(TARGETS hlslcc_exe
+    RUNTIME DESTINATION bin)
