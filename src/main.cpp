@@ -74,11 +74,6 @@ void PrintHelp()
                "  --shader-framebuffer-fetch                HLSLCC_FLAG_SHADER_FRAMEBUFFER_FETCH\n" << std::endl;
 }
 
-void ToLower(std::string &s)
-{
-  std::transform(std::begin(s), std::end(s), std::begin(s), std::tolower);
-}
-
 std::string GetArgument(
   const int         argc,
   const char *const *argv,
@@ -228,7 +223,6 @@ void ProcessArguments(
         // --* arguments
         case '-': {
           std::string opt(arg.c_str() + 2);
-          ToLower(opt);
           
           // output file
           if (opt == "language") {
@@ -237,7 +231,6 @@ void ProcessArguments(
               Error("--language missing argument");
             }
 
-            ToLower(optArg);
             language = ProcessLanguageArgument(optArg);
 
             if (language == LANG_DEFAULT) {
