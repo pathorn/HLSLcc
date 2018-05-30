@@ -99,7 +99,7 @@ static void SetCBOperandComponents(HLSLCrossCompilerContext *psContext, Operand 
 	const ConstantBuffer* psCBuf = NULL;
 	const ShaderVarType* psVarType = NULL;
 	int32_t rebase = 0;
-	bool isArray;
+	bool isArray = false;
 
 	if (psOperand->eType != OPERAND_TYPE_CONSTANT_BUFFER)
 		return;
@@ -118,11 +118,12 @@ static void SetCBOperandComponents(HLSLCrossCompilerContext *psContext, Operand 
 	}
 
 	psContext->psShader->sInfo.GetConstantBufferFromBindingPoint(RGROUP_CBUFFER, psOperand->aui32ArraySizes[0], &psCBuf);
-	ShaderInfo::GetShaderVarFromOffset(psOperand->aui32ArraySizes[1], psOperand->aui32Swizzle, psCBuf, &psVarType, &isArray, NULL, &rebase, psContext->flags);
+	if (psCBuf) {
+		ShaderInfo::GetShaderVarFromOffset(psOperand->aui32ArraySizes[1], psOperand->aui32Swizzle, psCBuf, &psVarType, &isArray, NULL, &rebase, psContext->flags);
 
-	if (psVarType->Class == SVC_SCALAR)
-		psOperand->iNumComponents = 1;
-
+		if (psVarType->Class == SVC_SCALAR)
+			psOperand->iNumComponents = 1;
+	}
 }
 
 struct SetPartialDataTypes

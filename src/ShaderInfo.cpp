@@ -11,6 +11,10 @@ SHADER_VARIABLE_TYPE ShaderInfo::GetTextureDataType(uint32_t regNo)
 	const ResourceBinding* psBinding = 0;
 	int found;
 	found = GetResourceFromBindingPoint(RGROUP_TEXTURE, regNo, &psBinding);
+	if (!found || !psBinding) {
+		// FIXME: Print warning maybe?
+		return SVT_FLOAT; // dunno...
+	}
 	ASSERT(found != 0);
 	return psBinding->GetDataType();
 }

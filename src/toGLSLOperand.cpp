@@ -465,13 +465,14 @@ void ToGLSL::TranslateVariableNameWithMask(bstring glsl, const Operand* psOperan
 		int32_t rebase = 0;
 		bool isArray;
 		psContext->psShader->sInfo.GetConstantBufferFromBindingPoint(RGROUP_CBUFFER, psOperand->aui32ArraySizes[0], &psCBuf);
-		ShaderInfo::GetShaderVarFromOffset(psOperand->aui32ArraySizes[1], psOperand->aui32Swizzle, psCBuf, &psVarType, &isArray, NULL, &rebase, psContext->flags);
-		if (psVarType->Columns == 1)
-		{
-			scalarWithSwizzle = 1; // Needs a constructor
-			*pui32IgnoreSwizzle = 1;
+		if (psCBuf) {
+			ShaderInfo::GetShaderVarFromOffset(psOperand->aui32ArraySizes[1], psOperand->aui32Swizzle, psCBuf, &psVarType, &isArray, NULL, &rebase, psContext->flags);
+			if (psVarType->Columns == 1)
+			{
+				scalarWithSwizzle = 1; // Needs a constructor
+				*pui32IgnoreSwizzle = 1;
+			}
 		}
-
 	}
 
 	if (piRebase)
@@ -890,11 +891,12 @@ void ToGLSL::TranslateVariableNameWithMask(bstring glsl, const Operand* psOperan
 				}
 				else
 				{
-					//bformata(glsl, "cb%d", psOperand->aui32ArraySizes[0]);
+					bformata(glsl, "cb%d", psOperand->aui32ArraySizes[0]);
 				}
 			}
 
-			if((ui32TOFlag & TO_FLAG_DECLARATION_NAME) != TO_FLAG_DECLARATION_NAME)
+			// FIXME: psCBuf null sometimes.
+			if(((ui32TOFlag & TO_FLAG_DECLARATION_NAME) != TO_FLAG_DECLARATION_NAME) && psCBuf)
 			{
 				//Work out the variable name. Don't apply swizzle to that variable yet.
 				int32_t rebase = 0;
